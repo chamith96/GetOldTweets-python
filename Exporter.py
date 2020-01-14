@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-import sys,getopt,datetime,codecs
+import sys,getopt,datetime,codecs,json
+
 if sys.version_info[0] < 3:
     import got
 else:
@@ -12,17 +13,18 @@ def main(argv):
 		return
 
 	if len(argv) == 1 and argv[0] == '-h':
-		f = open('exporter_help_text.txt', 'r')
-		print f.read()
+		f = open('exporter_help_text.json', 'r')
+		#print f.read()
 		f.close()
-
 		return
 
 	try:
 		opts, args = getopt.getopt(argv, "", ("username=", "near=", "within=", "since=", "until=", "querysearch=", "toptweets", "maxtweets=", "output="))
 
 		tweetCriteria = got.manager.TweetCriteria()
-		outputFileName = "output_got.csv"
+		outputFileName = "output_got.json"
+		data = {}
+		data['tweety'] = {}
 
 		for opt,arg in opts:
 			if opt == '--username':
@@ -57,13 +59,27 @@ def main(argv):
 				
 		outputFile = codecs.open(outputFileName, "w+", "utf-8")
 
-		outputFile.write('username;date;retweets;favorites;text;geo;mentions;hashtags;id;permalink')
-
+		#outputFile.write('username;date;retweets;favorites;text;geo;mentions;hashtags;id;permalink')
+		outputFile.write("[")
 		print('Searching...\n')
 
 		def receiveBuffer(tweets):
 			for t in tweets:
-				outputFile.write(('\n%s;%s;%d;%d;"%s";%s;%s;%s;"%s";%s' % (t.username, t.date.strftime("%Y-%m-%d %H:%M"), t.retweets, t.favorites, t.text, t.geo, t.mentions, t.hashtags, t.id, t.permalink)))
+				data['tweety'].update({
+    			'username': t.username,
+    			'date': t.date.strftime("%Y-%m-%d %H:%M"),
+    			'retweets': t.retweets,
+				'favorites': t.favorites,
+    			'content': t.text,
+    			'geo': t.geo,
+				'mentions': t.mentions,
+    			'hashtags': t.hashtags,
+				'id': t.id,
+    			'permalink': t.permalink
+				})
+				y = json.dumps(data['tweety'])
+				outputFile.write(y+',')
+				#outputFile.write(('\n%s;%s;%d;%d;"%s";%s;%s;%s;"%s";%s' % (t.username, t.date.strftime("%Y-%m-%d %H:%M"), t.retweets, t.favorites, t.text, t.geo, t.mentions, t.hashtags, t.id, t.permalink)))
 			outputFile.flush()
 			print('More %d saved on file...\n' % len(tweets))
 
@@ -72,6 +88,7 @@ def main(argv):
 	except arg:
 		print('Arguments parser error, try -h' + arg)
 	finally:
+		outputFile.write("]")
 		outputFile.close()
 		print('Done. Output file generated "%s".' % outputFileName)
 
