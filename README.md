@@ -95,3 +95,7 @@ pip install -r requirements.txt
 ```
     python Exporter.py --username "barackobama" --maxtweets 10 --toptweets
 ```
+- get location base tweets
+```
+   python Exporter.py querysearch "museum" --near "55.75, 37.61" --maxtweets 10
+```
