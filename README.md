@@ -97,5 +97,5 @@ pip install -r requirements.txt
 ```
 - get location base tweets
 ```
-   python Exporter.py querysearch "museum" --near "55.75, 37.61" --maxtweets 10
+   python Exporter.py --querysearch "museum" --near "55.75, 37.61" --maxtweets 10
 ```
